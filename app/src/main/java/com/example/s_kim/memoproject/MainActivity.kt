@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
             MemoInfo("title2", "222"),
             MemoInfo("title3", "333")
         )
-       // Log.d("aaa", memoInfoArrayList.toString())
+       Log.d("aaa", memoInfoArrayList.toString())
 
 
         //핵심으로 넣어야할 것들
