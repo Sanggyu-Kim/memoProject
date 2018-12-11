@@ -1,39 +1,61 @@
 package com.example.s_kim.memoproject
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu
-import android.view.MenuItem
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.util.Log
+import java.util.ArrayList
 
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var mRecyclerView: RecyclerView
+    private var viewAdapter: MyAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
-    }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
+        //데이터 등록
+        val memoInfoArrayList = listOf(
+            MemoInfo("title1", "111"),
+            MemoInfo("title2", "222"),
+            MemoInfo("title3", "333")
+        )
+       // Log.d("aaa", memoInfoArrayList.toString())
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
+
+        //핵심으로 넣어야할 것들
+        mRecyclerView = findViewById(R.id.recycler_view)
+        mRecyclerView.layoutManager = LinearLayoutManager(this)
+        viewAdapter = MyAdapter(memoInfoArrayList)
+        mRecyclerView.adapter = viewAdapter  //이게 없으면 아무것도 나오지 않는다.
+
+
+
+//데이터 작성
+        // val titleList:MutableList<String> // titleList 작성
+        // val titleListTest = arrayOf("kim","kkd","ddd")
+
+
+//                viewAdapter = MyAdapter(memoInfoArrayList)
+
+
+//        mRecyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
+//            // use this setting to improve performance if you know that changes
+//            // in content do not change the layout size of the RecyclerView
+//
+//            setHasFixedSize(true)
+//
+//            // use a linear layout manager
+//            layoutManager = viewManager
+//
+//            // specify an viewAdapter (see also next example)
+//            adapter = viewAdapter
+//
+//        }
+
+
     }
 }
