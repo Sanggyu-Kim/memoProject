@@ -11,11 +11,10 @@ class MyAdapter(private val memoInfoArrayList: List<MemoInfo>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     //아래 뷰홀더에서 받은 v를 레이아웃의 프래그먼트와 연결
-    class MyViewHolder(var view: View) : RecyclerView.ViewHolder(view) {
+    class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var title: TextView = view.findViewById(R.id.title1)
         var message: TextView = view.findViewById(R.id.message1)
-
-
+        var line:View = view.findViewById(R.id.line)
     }
 
     //여기 뷰홀더가 보여주는 거다

@@ -1,3 +1,3 @@
 package com.example.s_kim.memoproject
 
-class MemoInfo(var title: String, var message:String)
+class MemoInfo(var title: String , var message: String)
