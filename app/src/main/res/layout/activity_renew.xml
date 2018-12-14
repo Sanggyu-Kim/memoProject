@@ -10,15 +10,15 @@
     <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/scroll">
-
+            android:id="@+id/scroll3">
         <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+
             <EditText
                     app:layout_constraintTop_toTopOf="parent"
-                    android:id="@+id/createTitle"
+                    android:id="@+id/renewTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Write your title"
@@ -28,7 +28,7 @@
 
             <EditText
                     app:layout_constraintTop_toBottomOf="@id/createTitle"
-                    android:id="@+id/createMessage"
+                    android:id="@+id/renewMessage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="Write your Message"
@@ -36,12 +36,14 @@
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
 
+
     <Button
-            app:layout_constraintBottom_toBottomOf="@id/scroll"
-            app:layout_constraintRight_toRightOf="@id/scroll"
-            android:id="@+id/save"
+            app:layout_constraintBottom_toBottomOf="@id/scroll3"
+            app:layout_constraintRight_toRightOf="@id/scroll3"
+            android:id="@+id/commit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:text="save"/>
+            android:text="commit"
+    />
 </android.support.constraint.ConstraintLayout>
