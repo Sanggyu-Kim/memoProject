@@ -27,8 +27,6 @@
 
         <activity android:name=".ReadActivity">
         </activity>
-        <activity android:name=".RenewActivity">
-        </activity>
     </application>
 
 </manifest>

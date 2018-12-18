@@ -87,13 +87,13 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                     val renewTitle = data?.getStringExtra("renewTitle") ?: ""
                     val renewMessage = data?.getStringExtra("renewMessage") ?: ""
 
-                    val indexOfmemo2 = 0//memoInfoArrayList.indexOf(MemoInfo(renewNumber, pastTitle, pastMessage))
+                    val indexOfmemo2 = memoInfoArrayList.indexOf(MemoInfo(renewNumber, pastTitle, pastMessage))
                     Log.d(
                         "vvv",
-                        "renewNumber:$renewNumber renew Message: $renewMessage passMessage: $pastMessage indextofMemo2:$indexOfmemo2"
+                       "renewNumber:$ renewNumber renew Message: $renewMessage passMessage: $pastMessage indextofMemo2:$indexOfmemo2"
                     )
 
-                    memoInfoArrayList.set(indexOfmemo2,MemoInfo(renewNumber, renewTitle, renewMessage))
+                    memoInfoArrayList[indexOfmemo2] = MemoInfo(renewNumber, renewTitle, renewMessage)
                     viewAdapter?.notifyDataSetChanged()
                 }
             }
