@@ -16,18 +16,15 @@
                 android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
         <activity android:name=".CreateActivity"/>
         <activity android:name=".ReadActivity"/>
-
         <meta-data
                 android:name="com.google.android.actions"
                 android:resource="@xml/actions"/>
-
 
     </application>
 
