@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "41747895740",
+    "firebase_url": "https://memoproject-f8082.firebaseio.com",
+    "project_id": "memoproject-f8082",
+    "storage_bucket": "memoproject-f8082.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:41747895740:android:f58f994953451fee",
+        "android_client_info": {
+          "package_name": "com.example.s_kim.memoproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "41747895740-lukrihukqv94vnfgns6ucj3205q8m1gn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.s_kim.memoproject",
+            "certificate_hash": "85a6bcaac3c24c8a50d593d7808474f90c7be474"
+          }
+        },
+        {
+          "client_id": "41747895740-4rdo3usebaoiun869j14tlppsa3a052g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwC8AHbaap0KYHTsPolgEP2eI1es1u4nM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "41747895740-4rdo3usebaoiun869j14tlppsa3a052g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

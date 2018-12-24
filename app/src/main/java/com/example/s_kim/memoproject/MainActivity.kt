@@ -3,83 +3,143 @@ package com.example.s_kim.memoproject
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
+import android.support.design.widget.*
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.widget.Adapter
-import android.widget.Button
-import android.widget.Toast
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.database.FirebaseDatabase
 
+class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
 
-class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
     private lateinit var mRecyclerView: RecyclerView
     private var viewAdapter: MyAdapter? = null
 
-    var memoListNumber: Int = 0
+    var memoListNumber: Int = 0 //Memoの別個人番号(削除と変更のため)
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null //firebase
+    private val database = FirebaseDatabase.getInstance()
+        .getReferenceFromUrl("https://memoproject-f8082.firebaseio.com/")
 
-    //데이터 등록
-    private val memoInfoArrayList = mutableListOf<MemoInfo>()
-
+    private var memoInfoArrayList = mutableListOf<MemoInfo>() //Data登録
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        /**
+         *Obtain the FirebaseAnalytics.
+         */
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
-        //button createActivity로 이동
+        /**
+         *Memo作成ボタンを押すと、CreateActivityに移動
+         */
         findViewById<FloatingActionButton>(R.id.create).setOnClickListener {
-            //       Toast.makeText(this, "here", Toast.LENGTH_LONG).show()
-            val changeCreate = Intent(this, CreateActivity::class.java)
-            startActivityForResult(changeCreate, 1)
+            val changeCreate = Intent(this,
+                                      CreateActivity::class.java)
+            startActivityForResult(changeCreate,
+                                   1)
         }
 
-
-        //핵심으로 넣어야할 것들
+        /**
+         *RecyclerView適用：RecyclerViewで核心に必要なもの
+         */
         mRecyclerView = findViewById(R.id.recycler_view)
         mRecyclerView.layoutManager = LinearLayoutManager(this)
-        viewAdapter = MyAdapter(this, memoInfoArrayList)  //this는 class 뿐만아니라 adapter도 this
-        mRecyclerView.adapter = viewAdapter  //이게 없으면 아무것도 나오지 않는다.
+        viewAdapter = MyAdapter(this,
+                                memoInfoArrayList)  //thisは class それだけでなく adapterも this
+        mRecyclerView.adapter = viewAdapter  //これがないと何も出ない。（이게 없으면 아무것도 나오지 않는다.）
 
     }
 
-
+    /**
+     * RecyclerViewのlistを押すの場合、呼ぶ
+     */
     override fun onItemClick(memoNumber: Int, title: String, message: String) {
-        val moveToReadIntent = Intent(this, ReadActivity::class.java)
+        val moveToReadIntent = Intent(this,
+                                      ReadActivity::class.java)
         // Toast.makeText(this,"title: "+title +"message: "+message,Toast.LENGTH_LONG).show()
-        moveToReadIntent.putExtra("memoNumber", memoNumber)
-        moveToReadIntent.putExtra("title", title)
-        moveToReadIntent.putExtra("message", message)
-        startActivityForResult(moveToReadIntent, 2)
+        moveToReadIntent
+            .putExtra("memoNumber",
+                      memoNumber)
+        moveToReadIntent
+            .putExtra("title",
+                      title)
+        moveToReadIntent
+            .putExtra("message",
+                      message)
+        startActivityForResult(moveToReadIntent,
+                               2)
     }
 
-
+    /**
+     * Intentの結果を処理
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        super
+            .onActivityResult(requestCode,
+                              resultCode,
+                              data)
+
+        /**
+        Memo作成の結果を処理
+         */
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
-                ++memoListNumber
-
-                val title = data?.getStringExtra("title") ?: "" //?반드시 null이 아닐 경우만
+                ++memoListNumber //Memoの別個人番号(削除と変更のため)
+                val title = data?.getStringExtra("title") ?: ""
                 val message = data?.getStringExtra("message") ?: ""
-                memoInfoArrayList.add(MemoInfo(memoListNumber, title, message))  //리스트에도 ?를 추가해야 한다.
+
+                val memo = MemoInfo(memoListNumber,
+                                    title,
+                                    message)
+
+                memoInfoArrayList.add(memo) //LISTにも ?を追加しなければならない
+
+                // Write a message to the database
+                // myRef.setValue(memoInfoArrayList)
+                //  database.setValue(memo)
+
+                val key = database.child("memo").push().key
+                if (key == null) {
+                    Log
+                        .w("vv",
+                           "Couldn't get push key for posts")
+                    return
+                }
+
+                val memoUpdates = HashMap<String, Any>()
+                memoUpdates["/posts/$key"] = memo
+
+                database.updateChildren(memoUpdates)
+
             }
         }
 
+        /**
+        Memo削除・修正の結果を処理
+         */
         if (requestCode == 2) {
             when (resultCode) {
                 MemoConst.RESULT_DELETE -> {
                     val deleteTitle = data?.getStringExtra("deleteTitle") ?: ""  //null 許可しません。
                     val deleteMessage = data?.getStringExtra("deleteMessage") ?: "" // null　許可しません。
-                    val deleteNumber = data?.getIntExtra("deleteNumber", 0) ?: 0 //null 許可しません。
-                    val indexOfmemo = memoInfoArrayList.indexOf(MemoInfo(deleteNumber, deleteTitle, deleteMessage))
-                    memoInfoArrayList.remove(MemoInfo(deleteNumber,deleteTitle,deleteMessage))
-
+                    val deleteNumber = data?.getIntExtra("deleteNumber",
+                                                         0) ?: 0 //null 許可しません。
+                    val deleteIndex = memoInfoArrayList
+                        .indexOf(MemoInfo(deleteNumber,
+                                          deleteTitle,
+                                          deleteMessage))
+                    Log
+                        .d("delete",
+                           "deleteNumber:$deleteNumber deleteTitle: $deleteTitle deleteMessage: $deleteMessage deleteIndex:$deleteIndex")
+                    memoInfoArrayList.removeAt(deleteIndex)
+                    //memoInfoArrayList.remove(MemoInfo(deleteNumber, deleteTitle, deleteMessage))
                 }
-
-                MemoConst.RESULT_RENEW -> {
-                    val renewNumber = data?.getIntExtra("renewNumber", 0) ?: 0 //null 許可しません。
+                MemoConst.RESULT_RENEW  -> {
+                    val renewNumber = data?.getIntExtra("renewNumber",
+                                                        0) ?: 0 //null 許可しません。
 
                     val pastTitle = data?.getStringExtra("pastTitle") ?: ""
                     val pastMessage = data?.getStringExtra("pastMessage") ?: ""
@@ -87,13 +147,16 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                     val renewTitle = data?.getStringExtra("renewTitle") ?: ""
                     val renewMessage = data?.getStringExtra("renewMessage") ?: ""
 
-                    val indexOfmemo2 = memoInfoArrayList.indexOf(MemoInfo(renewNumber, pastTitle, pastMessage))
-                    Log.d(
-                        "vvv",
-                       "renewNumber:$ renewNumber renew Message: $renewMessage passMessage: $pastMessage indextofMemo2:$indexOfmemo2"
-                    )
-
-                    memoInfoArrayList[indexOfmemo2] = MemoInfo(renewNumber, renewTitle, renewMessage)
+                    val renewIndex = memoInfoArrayList
+                        .indexOf(MemoInfo(renewNumber,
+                                          pastTitle,
+                                          pastMessage))
+                    Log
+                        .d("renew",
+                           "renewNumber:$renewNumber renewMessage: $renewMessage passMessage: $pastMessage renewIndex:$renewIndex")
+                    memoInfoArrayList[renewIndex] = MemoInfo(renewNumber,
+                                                             renewTitle,
+                                                             renewMessage)
                     viewAdapter?.notifyDataSetChanged()
                 }
             }

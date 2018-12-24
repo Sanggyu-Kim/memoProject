@@ -14,42 +14,53 @@ import kotlinx.android.synthetic.main.activity_create.*
 
 class CreateActivity : AppCompatActivity() {
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create)
 
+        /**
+         *keyBoard 見える・隠す
+         */
+        var titleSwitch = true
+        findViewById<EditText>(R.id.createTitle).setOnClickListener {
+            if (titleSwitch) {
+                it.hideKeyboard()
+                titleSwitch = false
+            } else {
+                it.showKeyboard(it)
+                titleSwitch = true
+            }
+        }
+        var messageSwitch = true
+        findViewById<EditText>(R.id.createMessage).setOnClickListener {
+            if (messageSwitch) {
+                it.hideKeyboard()
+                messageSwitch = false
+            } else {
+                it.showKeyboard(it)
+                messageSwitch = true
+            }
+        }
+
+
+        /**
+         * 新しいMEMO作成（saveボタン）
+         */
         findViewById<Button>(R.id.save).setOnClickListener {
             val title = createTitle.editableText.toString()
             val message = createMessage.editableText.toString()
 
+            /**
+             * 空欄時制限
+             */
             if (title.isBlank() || message.isBlank()) {
                 Toast.makeText(this, "Write your Text", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener  //
+                return@setOnClickListener
             }
 
-            var titleSwitch = true
-            findViewById<EditText>(R.id.createTitle).setOnClickListener {
-                if (titleSwitch) {
-                    it.hideKeyboard()
-                    titleSwitch = false
-                } else {
-                    it.showKeyboard(it)
-                    titleSwitch = true
-                }
-            }
-
-            var messageSwitch = true
-            findViewById<EditText>(R.id.createMessage).setOnClickListener {
-                if (messageSwitch) {
-                    it.hideKeyboard()
-                    messageSwitch = false
-                } else {
-                    it.showKeyboard(it)
-                    messageSwitch = true
-                }
-            }
-
-            val creatIntent = Intent()  //인텐트 앞에 이동해 왔기 때문에 굳이 안에 안적어도 된다.
+            val creatIntent = Intent()  //インテントの前に移動してきたため,あえて中に書かなくてもいい。（인텐트 앞에 이동해 왔기 때문에 굳이 안에 안적어도 된다.）
             creatIntent.putExtra("title", title)
             creatIntent.putExtra("message", message)
             setResult(Activity.RESULT_OK, creatIntent)
@@ -59,12 +70,13 @@ class CreateActivity : AppCompatActivity() {
 
     }
 
-
+    /**
+     *keyBoard 見える・隠す
+     */
     private fun View.hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
     }
-
     private fun View.showKeyboard(view: View) {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(view, 0)

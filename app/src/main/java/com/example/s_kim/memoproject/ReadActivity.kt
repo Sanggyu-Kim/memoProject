@@ -8,6 +8,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_read.*
 
 class ReadActivity : AppCompatActivity() {
@@ -16,14 +17,17 @@ class ReadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
 
+        //intentで貰ったもの
         val title: String = intent.getStringExtra("title")
         val message: String = intent.getStringExtra("message")
         val memoNumber: Int = intent.getIntExtra("memoNumber", 0)
 
+        readTitle.setText(title)
+        readMessage.setText(message)
 
-        val renewTitle = readTitle.setText(title)
-        val renewMessage = readMessage.setText(message)
-
+        /**
+         *keyBoard 見える・隠す
+         */
         var titleSwitch = true
         findViewById<EditText>(R.id.readTitle).setOnClickListener {
             if (titleSwitch) {
@@ -46,20 +50,19 @@ class ReadActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Button>(R.id.delete).setOnClickListener {
-            //삭제
-            val deleteIntent = Intent(this, MainActivity::class.java)
-            deleteIntent.putExtra("deleteTitle", title)
-            deleteIntent.putExtra("deleteMessage", message)
-            deleteIntent.putExtra("deleteNumber", memoNumber)
-            setResult(MemoConst.RESULT_DELETE, deleteIntent)  //
-            finish()
-        }
 
-
-
+        /**
+        Memo 修正・削除
+         */
+        //修正
         findViewById<Button>(R.id.renew).setOnClickListener {
-            //수정
+
+            // 空欄時制限
+            if (readTitle.editableText.isBlank() || readMessage.editableText.isBlank()) {
+                Toast.makeText(this, "Write your Text", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val renewIntent = Intent(this, MainActivity::class.java)
             renewIntent.putExtra("pastTitle", title)
             renewIntent.putExtra("pastMessage", message)
@@ -69,9 +72,20 @@ class ReadActivity : AppCompatActivity() {
             setResult(MemoConst.RESULT_RENEW, renewIntent)
             finish()
         }
+        //削除
+        findViewById<Button>(R.id.delete).setOnClickListener {
+            val deleteIntent = Intent(this, MainActivity::class.java)
+            deleteIntent.putExtra("deleteTitle", title)
+            deleteIntent.putExtra("deleteMessage", message)
+            deleteIntent.putExtra("deleteNumber", memoNumber)
+            setResult(MemoConst.RESULT_DELETE, deleteIntent)  //
+            finish()
+        }
     }
 
-
+    /**
+     *keyBoard 見える・隠す
+     */
     private fun View.hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
