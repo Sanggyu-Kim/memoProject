@@ -8,18 +8,11 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.database.FirebaseDatabase
-import android.R.id.edit
-import android.content.Context
-import android.content.SharedPreferences
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.app.AlertDialog
 import android.widget.Toast
 
 
-class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
+ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
 
     private lateinit var mRecyclerView: RecyclerView
     private var viewAdapter: MyAdapter? = null
@@ -28,10 +21,12 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
     //private var mFirebaseAnalytics: FirebaseAnalytics? = null //firebase
     private var memoInfoArrayList = mutableListOf<MemoInfo>() //Data登録
 
-    //val dbHelper = DBHelper(applicationContext, "MEMOLIST.db", null!!, 1)
+
+    //data
     private val mDbOpenHelper: DbOpenHelper? = DbOpenHelper(this)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -43,8 +38,6 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
         mDbOpenHelper?.open()
         mDbOpenHelper?.create()
 
-        mDbOpenHelper?.deleteAllColumns()
-        Toast.makeText(this,"全部削除",Toast.LENGTH_SHORT).show()
 
         showDatabase()
         /**
@@ -63,6 +56,17 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                 1
             )
         }
+
+        /**
+         *Memo全部削除
+         */
+
+        findViewById<FloatingActionButton>(R.id.deleteall).setOnClickListener {
+
+            Log.d("click", "delete!!")
+            deleteDialog()
+        }
+
 
         /**
          *RecyclerView適用：RecyclerViewで核心に必要なもの
@@ -168,7 +172,7 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                             "delete",
                             "deleteNumber:$deleteNumber deleteTitle: $deleteTitle deleteMessage: $deleteMessage deleteIndex:$deleteIndex"
                         )
-                    memoInfoArrayList.remove(MemoInfo(deleteNumber,deleteTitle,deleteMessage))
+                    memoInfoArrayList.remove(MemoInfo(deleteNumber, deleteTitle, deleteMessage))
 
                     mDbOpenHelper?.deleteColumn(deleteNumber)
                     Toast.makeText(this@MainActivity, "Dataを削除しました。", Toast.LENGTH_SHORT).show()
@@ -240,6 +244,23 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
             }
         }
         return count
+    }
+
+
+    private fun deleteDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("全部削除")
+        builder.setMessage("全部削除しても大丈夫ですか")
+            .setPositiveButton("YES") { dialog, id ->
+                mDbOpenHelper?.deleteAllColumns()
+                Toast.makeText(this, "全部削除", Toast.LENGTH_SHORT).show()
+                memoInfoArrayList.clear()   //
+                viewAdapter?.notifyDataSetChanged()
+            }
+            .setNegativeButton("NO") { dialog, id ->
+            }
+        builder.show()
+
     }
 
 
