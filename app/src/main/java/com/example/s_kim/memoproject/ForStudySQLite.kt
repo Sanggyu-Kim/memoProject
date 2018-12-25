@@ -51,7 +51,7 @@ class DBHelper// DBHelper 생성자로 관리할 DB 이름과 버전 정보를 �
 
     fun update(memoNumber: Int, title: String) {
         val db = writableDatabase
-        // 입력한 항목과 일치하는 행의 가격 정보 수정
+        // 입력한 항목과 일치하는 행의 정보 수정
         db.execSQL("UPDATE MEMOLIST SET title=$title WHERE memoNumber='$memoNumber';")
         db.close()
     }
