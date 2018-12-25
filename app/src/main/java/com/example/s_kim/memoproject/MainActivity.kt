@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
     private lateinit var mRecyclerView: RecyclerView
     private var viewAdapter: MyAdapter? = null
 
-    var memoListNumber: Int = 0 //Memoの別個人番号(削除と変更のため)
+
     //private var mFirebaseAnalytics: FirebaseAnalytics? = null //firebase
     private var memoInfoArrayList = mutableListOf<MemoInfo>() //Data登録
 
@@ -43,8 +43,10 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
         mDbOpenHelper?.open()
         mDbOpenHelper?.create()
 
-        showDatabase()
+        mDbOpenHelper?.deleteAllColumns()
+        Toast.makeText(this,"全部削除",Toast.LENGTH_SHORT).show()
 
+        showDatabase()
         /**
          *Memo作成ボタンを押すと、CreateActivityに移動
          */
@@ -53,6 +55,9 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                 this,
                 CreateActivity::class.java
             )
+
+            changeCreate.putExtra("memoListNumber", countData())
+
             startActivityForResult(
                 changeCreate,
                 1
@@ -71,7 +76,6 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
         mRecyclerView.adapter = viewAdapter  //これがないと何も出ない。（이게 없으면 아무것도 나오지 않는다.）
 
     }
-
 
 
     /**
@@ -120,10 +124,10 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
          */
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
-                ++memoListNumber //Memoの別個人番号(削除と変更のため)
+                // memoListNumber = //Memoの別個人番号(削除と変更のため)
                 val title = data?.getStringExtra("title") ?: ""
                 val message = data?.getStringExtra("message") ?: ""
-
+                val memoListNumber = data?.getIntExtra("memoListNumber", 0) ?: 0
                 val memo = MemoInfo(
                     memoListNumber,
                     title,
@@ -133,8 +137,9 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                 memoInfoArrayList.add(memo) //LISTにも ?を追加しなければならない
 
                 mDbOpenHelper?.open()
-                mDbOpenHelper?.insertColumn(memoListNumber,title,message)
+                mDbOpenHelper?.insertColumn(memoListNumber, title, message)
 
+                viewAdapter?.notifyDataSetChanged()
             }
         }
 
@@ -163,10 +168,12 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                             "delete",
                             "deleteNumber:$deleteNumber deleteTitle: $deleteTitle deleteMessage: $deleteMessage deleteIndex:$deleteIndex"
                         )
-                    memoInfoArrayList.removeAt(deleteIndex)
+                    memoInfoArrayList.remove(MemoInfo(deleteNumber,deleteTitle,deleteMessage))
 
                     mDbOpenHelper?.deleteColumn(deleteNumber)
                     Toast.makeText(this@MainActivity, "Dataを削除しました。", Toast.LENGTH_SHORT).show()
+
+                    viewAdapter?.notifyDataSetChanged()
                 }
                 MemoConst.RESULT_RENEW -> {
                     val renewNumber = data?.getIntExtra(
@@ -199,9 +206,8 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
                         renewMessage
                     )
 
-                    mDbOpenHelper?.updateColumn(renewNumber,renewTitle,renewMessage)
+                    mDbOpenHelper?.updateColumn(renewNumber, renewTitle, renewMessage)
                     Toast.makeText(this@MainActivity, "Dataを修正しました。.", Toast.LENGTH_SHORT).show()
-
 
                     viewAdapter?.notifyDataSetChanged()
 
@@ -213,23 +219,28 @@ class MainActivity : AppCompatActivity(), MyAdapter.ClickRead {
 
     private fun showDatabase() {
         var iCursor = mDbOpenHelper?.sortColumn()
-
         if (iCursor != null) {
             while (iCursor.moveToNext()) {
-                var memoNumber= iCursor.getString(iCursor.getColumnIndex("memoNumber"))
+                var memoNumber = iCursor.getString(iCursor.getColumnIndex("memoNumber"))
                 var title = iCursor.getString(iCursor.getColumnIndex("title"))
                 var message = iCursor.getString(iCursor.getColumnIndex("message"))
 
-                val memo = MemoInfo(memoNumber.toInt(),title,message)
+                val memo = MemoInfo(memoNumber.toInt(), title, message)
                 memoInfoArrayList.add(memo)
             }
         }
     }
 
-
-
-
-
+    private fun countData(): Int {
+        var iCursor = mDbOpenHelper?.sortColumn()
+        var count = 0
+        if (iCursor != null) {
+            while (iCursor.moveToNext()) {
+                count = iCursor.getString(iCursor.getColumnIndex("memoNumber")).toInt()
+            }
+        }
+        return count
+    }
 
 
 }

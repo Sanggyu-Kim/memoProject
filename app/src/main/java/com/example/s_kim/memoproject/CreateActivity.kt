@@ -13,12 +13,14 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_create.*
 
 class CreateActivity : AppCompatActivity() {
-
-
+    var memoListNumber = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create)
+
+        memoListNumber = intent.getIntExtra("memoListNumber", -1)//Memoの別個人番号(削除と変更のため)
+
 
         /**
          *keyBoard 見える・隠す
@@ -59,10 +61,11 @@ class CreateActivity : AppCompatActivity() {
                 Toast.makeText(this, "Write your Text", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
+            ++memoListNumber
             val creatIntent = Intent()  //インテントの前に移動してきたため,あえて中に書かなくてもいい。（인텐트 앞에 이동해 왔기 때문에 굳이 안에 안적어도 된다.）
             creatIntent.putExtra("title", title)
             creatIntent.putExtra("message", message)
+            creatIntent.putExtra("memoListNumber", memoListNumber)
             setResult(Activity.RESULT_OK, creatIntent)
             finish()
         }
@@ -77,6 +80,7 @@ class CreateActivity : AppCompatActivity() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
     }
+
     private fun View.showKeyboard(view: View) {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(view, 0)
