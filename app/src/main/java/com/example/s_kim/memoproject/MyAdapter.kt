@@ -1,10 +1,11 @@
 package com.example.s_kim.memoproject
 
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.*
 
 class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: List<MemoInfo>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -16,6 +17,8 @@ class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: 
         var title: TextView = view.findViewById(R.id.title1)
         var message: TextView = view.findViewById(R.id.message1)
         var line: View = view.findViewById(R.id.line)
+
+
     }
 
     /**ここがviewholderを見せる
@@ -25,6 +28,7 @@ class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.fragment_article, parent, false)
+
 
         // v.findViewById(R.id.Title1)ようにすぐ連結できる?                           (v.findViewById(R.id.Title1)처럼 바로 연결할수도 있나?)
 
@@ -45,8 +49,10 @@ class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: 
         myViewHolder.message.text = memoInfoArrayList[position].message
 
         //RecyclerViewのlistを押すの場合、今押しているmemoの個人番号,title,messageを一緒に含めてmainActivityに移動!
+
+
         holder.itemView.setOnClickListener {
-            readMove.onItemClick(memoNumber,myViewHolder.title.text.toString(),myViewHolder.message.text.toString())
+            readMove.onItemSwipedAction(memoNumber, myViewHolder.title.text.toString(), myViewHolder.message.text.toString())
         }
     }
 
@@ -62,8 +68,10 @@ class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: 
      * RecyclerViewのlistを押すの場合、呼ぶ
      */
     interface ClickRead {
-        fun onItemClick(memoNumber:Int, text:String, Message:String)
+        fun onItemSwipedAction(memoNumber:Int, text:String, Message:String)
     }
+
+
 
 
 }
