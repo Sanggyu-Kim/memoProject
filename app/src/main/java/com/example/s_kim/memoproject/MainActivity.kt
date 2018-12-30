@@ -34,13 +34,12 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
         //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         /**
-         *Memo 내부 데이터와 연결
+         *Memo 内部データと連結
          */
         mDbOpenHelper?.open()
         mDbOpenHelper?.create()
-
-
         showDatabase()
+
         /**
          *Memo作成ボタンを押すと、CreateActivityに移動
          */
@@ -85,7 +84,6 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
      * RecyclerViewのlistを押すの場合、呼ぶ
      */
     override fun onItemSwipedAction(memoNumber: Int, title: String, message: String) {
-
 
         val moveToReadIntent = Intent(this,
                                       ReadActivity::class.java)
@@ -206,7 +204,7 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
     }
 
     /**
-    Memo 내부 데이터와 연결하여, 이전에 내부데이터를 받아 리스트에 적용
+    Memo 内部データと連結して,以前に内部データを受け取りリストに適用
      */
     private fun showDatabase() {
         var iCursor = mDbOpenHelper?.sortColumn()
@@ -225,7 +223,7 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
     }
 
     /**
-    Memo 내부 데이터와 연결하여, 이전에 내부데이터의 개수를 리턴함.
+    Memo 内部データと連結し,以前に内部データの個数をreturnする。
      */
     private fun countData(): Int {
         var iCursor = mDbOpenHelper?.sortColumn()
@@ -239,7 +237,7 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
     }
 
     /**
-    Memo 전체 삭제버튼을 클릭시, 다이아로그를 띄움
+    Memo 全体削除ボタンをクリックするときにダイアログを表示させる。
      */
     private fun deleteDialog() {
         val builder = AlertDialog.Builder(this)
@@ -255,51 +253,50 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
         }.setNegativeButton("NO") { dialog, id ->
         }
         builder.show()
-
     }
 
     /**
-     * 메모리스트에서 슬라이드로 삭제하는 액션 적용
+     * memoListからswipeで削除するアクション適用
      */
-
     private var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback = object:
-                ItemTouchHelper.SimpleCallback(0,
-                                               ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            ItemTouchHelper.SimpleCallback(0,
+                                           ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
-            override fun onMove(recyclerView: RecyclerView,
-                                viewHolder: RecyclerView.ViewHolder,
-                                target: RecyclerView.ViewHolder): Boolean {
-                showToast("on Move")
-                return true
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
-                // 삭제되는 아이템의 포지션을 가져온다
-                val position = viewHolder.adapterPosition
-                // 데이터의 해당 포지션을 삭제한다
-                memoInfoArrayList.removeAt(position)
-
-
-                /**
-                 * 에러발생!!! 메모번호랑 클릭시 번호랑 매치해서 확인해보기... 아마도 포지션 번호랑 메모 번호가 안맞는 듯하다....
-                 */
-
-                //showToast("메모번호: ${memoInfoArrayList[position].memoNumber-1}")
-
-                // mDbOpenHelper?.deleteColumn(memoInfoArrayList[position].memoNumber)
-
-                viewAdapter?.notifyItemRemoved(position)
-            }
+        override fun onMove(recyclerView: RecyclerView,
+                            viewHolder: RecyclerView.ViewHolder,
+                            target: RecyclerView.ViewHolder): Boolean {
+            showToast("on Move")
+            return true
         }
 
-        private fun showToast(msg: String) {
-            if (mToast != null) mToast?.cancel()
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
+            // 削除されるitemのpositionを持ってくる
+            val position = viewHolder.adapterPosition
+            // データの該当positionを削除する。
+            memoInfoArrayList.removeAt(position)
 
-            mToast = Toast
-                .makeText(this@MainActivity,
-                          msg,
-                          Toast.LENGTH_SHORT)
-            mToast?.show()
+            /**
+             * 에러발생!!! 메모번호랑 클릭시 번호랑 매치해서 확인해보기... 아마도 포지션 번호랑 메모 번호가 안맞는 듯하다....
+             */
+
+            //showToast("메모번호: ${memoInfoArrayList[position].memoNumber-1}")
+            // mDbOpenHelper?.deleteColumn(memoInfoArrayList[position].memoNumber)
+            viewAdapter?.notifyItemRemoved(position)
         }
+    }
+
+    /**
+     * Toast
+     */
+    private fun showToast(msg: String) {
+        if (mToast != null) mToast?.cancel()
+
+        mToast = Toast
+            .makeText(this@MainActivity,
+                      msg,
+                      Toast.LENGTH_SHORT)
+        mToast?.show()
+
+    }
 
 }

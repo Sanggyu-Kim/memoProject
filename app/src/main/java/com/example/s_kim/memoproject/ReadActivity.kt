@@ -11,7 +11,7 @@ import android.widget.EditText
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_read.*
 
-class ReadActivity : AppCompatActivity() {
+class ReadActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +20,9 @@ class ReadActivity : AppCompatActivity() {
         //intentで貰ったもの
         val title: String = intent.getStringExtra("title")
         val message: String = intent.getStringExtra("message")
-        val memoNumber: Int = intent.getIntExtra("memoNumber", 0)
+        val memoNumber: Int = intent
+            .getIntExtra("memoNumber",
+                         0)
 
         readTitle.setText(title)
         readMessage.setText(message)
@@ -50,7 +52,6 @@ class ReadActivity : AppCompatActivity() {
             }
         }
 
-
         /**
         Memo 修正・削除
          */
@@ -59,26 +60,49 @@ class ReadActivity : AppCompatActivity() {
 
             // 空欄時制限
             if (readTitle.editableText.isBlank() || readMessage.editableText.isBlank()) {
-                Toast.makeText(this, "Write your Text", Toast.LENGTH_SHORT).show()
+                Toast
+                    .makeText(this,
+                              "Write your Text",
+                              Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val renewIntent = Intent(this, MainActivity::class.java)
-            renewIntent.putExtra("pastTitle", title)
-            renewIntent.putExtra("pastMessage", message)
-            renewIntent.putExtra("renewTitle", readTitle.text.toString())
-            renewIntent.putExtra("renewMessage", readMessage.text.toString())
-            renewIntent.putExtra("renewNumber", memoNumber)
-            setResult(MemoConst.RESULT_RENEW, renewIntent)
+            val renewIntent = Intent(this,
+                                     MainActivity::class.java)
+            renewIntent
+                .putExtra("pastTitle",
+                          title)
+            renewIntent
+                .putExtra("pastMessage",
+                          message)
+            renewIntent
+                .putExtra("renewTitle",
+                          readTitle.text.toString())
+            renewIntent
+                .putExtra("renewMessage",
+                          readMessage.text.toString())
+            renewIntent
+                .putExtra("renewNumber",
+                          memoNumber)
+            setResult(MemoConst.RESULT_RENEW,
+                      renewIntent)
             finish()
         }
         //削除
         findViewById<Button>(R.id.delete).setOnClickListener {
-            val deleteIntent = Intent(this, MainActivity::class.java)
-            deleteIntent.putExtra("deleteTitle", title)
-            deleteIntent.putExtra("deleteMessage", message)
-            deleteIntent.putExtra("deleteNumber", memoNumber)
-            setResult(MemoConst.RESULT_DELETE, deleteIntent)  //
+            val deleteIntent = Intent(this,
+                                      MainActivity::class.java)
+            deleteIntent
+                .putExtra("deleteTitle",
+                          title)
+            deleteIntent
+                .putExtra("deleteMessage",
+                          message)
+            deleteIntent
+                .putExtra("deleteNumber",
+                          memoNumber)
+            setResult(MemoConst.RESULT_DELETE,
+                      deleteIntent)  //
             finish()
         }
     }
@@ -88,13 +112,16 @@ class ReadActivity : AppCompatActivity() {
      */
     private fun View.hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(windowToken, 0)
+        imm
+            .hideSoftInputFromWindow(windowToken,
+                                     0)
     }
 
     private fun View.showKeyboard(view: View) {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(view, 0)
+        imm
+            .showSoftInput(view,
+                           0)
     }
-
 
 }
