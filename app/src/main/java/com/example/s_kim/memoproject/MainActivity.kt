@@ -12,93 +12,119 @@ import android.app.AlertDialog
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.widget.Toast
 
-class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
+class MainActivity : AppCompatActivity(), MainAdapter.ClickRead {
 
     private lateinit var mRecyclerView: RecyclerView
-    private var viewAdapter: MyAdapter? = null
+    private var viewAdapter: MainAdapter? = null
     private var mToast: Toast? = null
+    private var memoInfoArrayList = mutableListOf<MemoInfo>() //listでData登録
+    private val mDbOpenHelper: DbOpenHelper? = DbOpenHelper(this) //data
 
-    //private var mFirebaseAnalytics: FirebaseAnalytics? = null //firebase
-    private var memoInfoArrayList = mutableListOf<MemoInfo>() //Data登録
-
-    //data
-    private val mDbOpenHelper: DbOpenHelper? = DbOpenHelper(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        /**
-         *Obtain the FirebaseAnalytics.
-         */
-        //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        sqlLiteData()//Memo 内部データと連結
+        create() //Memo作成ボタンを押すと、CreateActivityに移動
+        deleteAll()//Memo全部削除
+        recyclerViewMain()//RecyclerView適用：RecyclerViewで核心に必要なもの
+        swipeDelete()//memoListからswipeで削除するアクション適用
+    }
 
-        /**
-         *Memo 内部データと連結
-         */
+
+    /**
+     *RecyclerView適用：RecyclerViewで核心に必要なもの
+     */
+    private fun recyclerViewMain() {
+        mRecyclerView = findViewById(R.id.recycler_view)
+        mRecyclerView.layoutManager = LinearLayoutManager(this)
+        viewAdapter = MainAdapter(
+            this,
+            memoInfoArrayList
+        )  //thisは class それだけでなく adapterも this
+        mRecyclerView.adapter = viewAdapter  //これがないと何も出ない。（이게 없으면 아무것도 나오지 않는다.）
+
+    }
+
+    /**
+     * memoListからswipeで削除するアクション適用
+     */
+    private fun swipeDelete() {
+        val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
+        itemTouchHelper.attachToRecyclerView(mRecyclerView)
+    }
+
+    /**
+     *Memo 内部データと連結
+     */
+    private fun sqlLiteData() {
         mDbOpenHelper?.open()
         mDbOpenHelper?.create()
         showDatabase()
+    }
 
-        /**
-         *Memo作成ボタンを押すと、CreateActivityに移動
-         */
-        findViewById<FloatingActionButton>(R.id.create).setOnClickListener {
-            val changeCreate = Intent(this,
-                                      CreateActivity::class.java)
-
-            changeCreate
-                .putExtra("memoListNumber",
-                          countData())
-
-            startActivityForResult(changeCreate,
-                                   1)
-        }
-
-        /**
-         *Memo全部削除
-         */
+    /**
+     *Memo全部削除
+     */
+    private fun deleteAll() {
         findViewById<FloatingActionButton>(R.id.deleteall).setOnClickListener {
-
-            Log
-                .d("click",
-                   "delete!!")
             deleteDialog()
         }
+    }
 
-        /**
-         *RecyclerView適用：RecyclerViewで核心に必要なもの
-         */
-        mRecyclerView = findViewById(R.id.recycler_view)
-        mRecyclerView.layoutManager = LinearLayoutManager(this)
-        viewAdapter = MyAdapter(this,
-                                memoInfoArrayList)  //thisは class それだけでなく adapterも this
-        mRecyclerView.adapter = viewAdapter  //これがないと何も出ない。（이게 없으면 아무것도 나오지 않는다.）
+    /**
+     *Memo作成ボタンを押すと、CreateActivityに移動
+     */
+    private fun create() {
+        findViewById<FloatingActionButton>(R.id.create).setOnClickListener {
+            val changeCreate = Intent(
+                this,
+                CreateActivity::class.java
+            )
 
-        val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
-        itemTouchHelper.attachToRecyclerView(mRecyclerView)
+            changeCreate
+                .putExtra(
+                    "memoListNumber",
+                    countData()
+                )
 
+            startActivityForResult(
+                changeCreate,
+                1
+            )
+        }
     }
 
     /**
      * RecyclerViewのlistを押すの場合、呼ぶ
      */
-    override fun onItemSwipedAction(memoNumber: Int, title: String, message: String) {
+    override fun onItemClickedAction(memoNumber: Int, title: String, message: String) {
 
-        val moveToReadIntent = Intent(this,
-                                      ReadActivity::class.java)
+        val moveToReadIntent = Intent(
+            this,
+            ReadActivity::class.java
+        )
         // Toast.makeText(this,"title: "+title +"message: "+message,Toast.LENGTH_LONG).show()
         moveToReadIntent
-            .putExtra("memoNumber",
-                      memoNumber)
+            .putExtra(
+                "memoNumber",
+                memoNumber
+            )
         moveToReadIntent
-            .putExtra("title",
-                      title)
+            .putExtra(
+                "title",
+                title
+            )
         moveToReadIntent
-            .putExtra("message",
-                      message)
-        startActivityForResult(moveToReadIntent,
-                               2)
+            .putExtra(
+                "message",
+                message
+            )
+        startActivityForResult(
+            moveToReadIntent,
+            2
+        )
     }
 
     /**
@@ -106,9 +132,11 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super
-            .onActivityResult(requestCode,
-                              resultCode,
-                              data)
+            .onActivityResult(
+                requestCode,
+                resultCode,
+                data
+            )
 
         /**
         Memo作成の結果を処理
@@ -118,19 +146,25 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
                 // memoListNumber = //Memoの別個人番号(削除と変更のため)
                 val title = data?.getStringExtra("title") ?: ""
                 val message = data?.getStringExtra("message") ?: ""
-                val memoListNumber = data?.getIntExtra("memoListNumber",
-                                                       0) ?: 0
-                val memo = MemoInfo(memoListNumber,
-                                    title,
-                                    message)
+                val memoListNumber = data?.getIntExtra(
+                    "memoListNumber",
+                    0
+                ) ?: 0
+                val memo = MemoInfo(
+                    memoListNumber,
+                    title,
+                    message
+                )
 
                 memoInfoArrayList.add(memo) //LISTにも ?を追加しなければならない
 
                 mDbOpenHelper?.open()
                 mDbOpenHelper
-                    ?.insertColumn(memoListNumber,
-                                   title,
-                                   message)
+                    ?.insertColumn(
+                        memoListNumber,
+                        title,
+                        message
+                    )
 
                 viewAdapter?.notifyDataSetChanged()
             }
@@ -144,31 +178,49 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
                 MemoConst.RESULT_DELETE -> {
                     val deleteTitle = data?.getStringExtra("deleteTitle") ?: ""  //null 許可しません。
                     val deleteMessage = data?.getStringExtra("deleteMessage") ?: "" // null　許可しません。
-                    val deleteNumber = data?.getIntExtra("deleteNumber",
-                                                         0) ?: 0 //null 許可しません。
+                    val deleteNumber = data?.getIntExtra(
+                        "deleteNumber",
+                        0
+                    ) ?: 0 //null 許可しません。
                     val deleteIndex = memoInfoArrayList
-                        .indexOf(MemoInfo(deleteNumber,
-                                          deleteTitle,
-                                          deleteMessage))
+                        .indexOf(
+                            MemoInfo(
+                                deleteNumber,
+                                deleteTitle,
+                                deleteMessage
+                            )
+                        )
                     Log
-                        .d("delete",
-                           "deleteNumber:$deleteNumber deleteTitle: $deleteTitle deleteMessage: $deleteMessage deleteIndex:$deleteIndex")
+                        .d(
+                            "delete",
+                            "deleteNumber:$deleteNumber deleteTitle: $deleteTitle deleteMessage: $deleteMessage deleteIndex:$deleteIndex"
+                        )
                     memoInfoArrayList
-                        .remove(MemoInfo(deleteNumber,
-                                         deleteTitle,
-                                         deleteMessage))
+                        .remove(
+                            MemoInfo(
+                                deleteNumber,
+                                deleteTitle,
+                                deleteMessage
+                            )
+                        )
 
                     mDbOpenHelper?.deleteColumn(deleteNumber)
+
+
                     Toast
-                        .makeText(this@MainActivity,
-                                  "Dataを削除しました。",
-                                  Toast.LENGTH_SHORT).show()
+                        .makeText(
+                            this@MainActivity,
+                            "Dataを削除しました。",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
                     viewAdapter?.notifyDataSetChanged()
                 }
-                MemoConst.RESULT_RENEW  -> {
-                    val renewNumber = data?.getIntExtra("renewNumber",
-                                                        0) ?: 0 //null 許可しません。
+                MemoConst.RESULT_RENEW -> {
+                    val renewNumber = data?.getIntExtra(
+                        "renewNumber",
+                        0
+                    ) ?: 0 //null 許可しません。
 
                     val pastTitle = data?.getStringExtra("pastTitle") ?: ""
                     val pastMessage = data?.getStringExtra("pastMessage") ?: ""
@@ -177,24 +229,36 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
                     val renewMessage = data?.getStringExtra("renewMessage") ?: ""
 
                     val renewIndex = memoInfoArrayList
-                        .indexOf(MemoInfo(renewNumber,
-                                          pastTitle,
-                                          pastMessage))
+                        .indexOf(
+                            MemoInfo(
+                                renewNumber,
+                                pastTitle,
+                                pastMessage
+                            )
+                        )
                     Log
-                        .d("renew",
-                           "renewNumber:$renewNumber renewMessage: $renewMessage passMessage: $pastMessage renewIndex:$renewIndex")
-                    memoInfoArrayList[renewIndex] = MemoInfo(renewNumber,
-                                                             renewTitle,
-                                                             renewMessage)
+                        .d(
+                            "renew",
+                            "renewNumber:$renewNumber renewMessage: $renewMessage passMessage: $pastMessage renewIndex:$renewIndex"
+                        )
+                    memoInfoArrayList[renewIndex] = MemoInfo(
+                        renewNumber,
+                        renewTitle,
+                        renewMessage
+                    )
 
                     mDbOpenHelper
-                        ?.updateColumn(renewNumber,
-                                       renewTitle,
-                                       renewMessage)
+                        ?.updateColumn(
+                            renewNumber,
+                            renewTitle,
+                            renewMessage
+                        )
                     Toast
-                        .makeText(this@MainActivity,
-                                  "Dataを修正しました。.",
-                                  Toast.LENGTH_SHORT).show()
+                        .makeText(
+                            this@MainActivity,
+                            "Dataを修正しました。.",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
                     viewAdapter?.notifyDataSetChanged()
 
@@ -214,9 +278,11 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
                 var title = iCursor.getString(iCursor.getColumnIndex("title"))
                 var message = iCursor.getString(iCursor.getColumnIndex("message"))
 
-                val memo = MemoInfo(memoNumber.toInt(),
-                                    title,
-                                    message)
+                val memo = MemoInfo(
+                    memoNumber.toInt(),
+                    title,
+                    message
+                )
                 memoInfoArrayList.add(memo)
             }
         }
@@ -245,9 +311,11 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
         builder.setMessage("全部削除しても大丈夫ですか").setPositiveButton("YES") { dialog, id ->
             mDbOpenHelper?.deleteAllColumns()
             Toast
-                .makeText(this,
-                          "全部削除",
-                          Toast.LENGTH_SHORT).show()
+                .makeText(
+                    this,
+                    "全部削除",
+                    Toast.LENGTH_SHORT
+                ).show()
             memoInfoArrayList.clear()   //
             viewAdapter?.notifyDataSetChanged()
         }.setNegativeButton("NO") { dialog, id ->
@@ -258,13 +326,17 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
     /**
      * memoListからswipeで削除するアクション適用
      */
-    private var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback = object:
-            ItemTouchHelper.SimpleCallback(0,
-                                           ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+    private var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback = object :
+        ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
 
-        override fun onMove(recyclerView: RecyclerView,
-                            viewHolder: RecyclerView.ViewHolder,
-                            target: RecyclerView.ViewHolder): Boolean {
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
             showToast("on Move")
             return true
         }
@@ -272,15 +344,15 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
             // 削除されるitemのpositionを持ってくる
             val position = viewHolder.adapterPosition
-            // データの該当positionを削除する。
+
+            showToast("position: $position, number: ${memoInfoArrayList[position].memoNumber}")
+            Log.d(
+                "onSwipe",
+                "position: $position, number: ${memoInfoArrayList[position].memoNumber}"
+            )
+
+            mDbOpenHelper?.deleteColumn(memoInfoArrayList[position].memoNumber)   //dataを削除してからリストを削除する＿error_indexOutOfBoundException
             memoInfoArrayList.removeAt(position)
-
-            /**
-             * 에러발생!!! 메모번호랑 클릭시 번호랑 매치해서 확인해보기... 아마도 포지션 번호랑 메모 번호가 안맞는 듯하다....
-             */
-
-            //showToast("메모번호: ${memoInfoArrayList[position].memoNumber-1}")
-            // mDbOpenHelper?.deleteColumn(memoInfoArrayList[position].memoNumber)
             viewAdapter?.notifyItemRemoved(position)
         }
     }
@@ -292,9 +364,11 @@ class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
         if (mToast != null) mToast?.cancel()
 
         mToast = Toast
-            .makeText(this@MainActivity,
-                      msg,
-                      Toast.LENGTH_SHORT)
+            .makeText(
+                this@MainActivity,
+                msg,
+                Toast.LENGTH_SHORT
+            )
         mToast?.show()
 
     }

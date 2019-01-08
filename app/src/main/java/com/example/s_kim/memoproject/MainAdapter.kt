@@ -1,13 +1,12 @@
 package com.example.s_kim.memoproject
 
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 
-class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: List<MemoInfo>):
+class MainAdapter(private val readMove: ClickRead, private val memoInfoArrayList: List<MemoInfo>):
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     /**
@@ -26,7 +25,7 @@ class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: 
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.fragment_article,
+            .inflate(R.layout.fragment_main,
                      parent,
                      false)
 
@@ -52,7 +51,7 @@ class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: 
 
         holder.itemView.setOnClickListener {
             readMove
-                .onItemSwipedAction(memoNumber,
+                .onItemClickedAction(memoNumber,
                                     myViewHolder.title.text.toString(),
                                     myViewHolder.message.text.toString())
         }
@@ -70,7 +69,7 @@ class MyAdapter(private val readMove: ClickRead, private val memoInfoArrayList: 
      * RecyclerViewのlistを押すの場合、呼ぶ
      */
     interface ClickRead {
-        fun onItemSwipedAction(memoNumber: Int, text: String, Message: String)
+        fun onItemClickedAction(memoNumber: Int, text: String, Message: String)
     }
 
 }
