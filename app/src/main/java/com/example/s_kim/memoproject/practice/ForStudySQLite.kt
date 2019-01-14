@@ -1,9 +1,9 @@
-package com.example.s_kim.memoproject
+package com.example.s_kim.memoproject.practice
 
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.s_kim.memoproject.MemoInfo
 
 class DBHelper // DBHelper 생성자로 관리할 DB 이름과 버전 정보를 받음
 (context: Context, name: String, factory: SQLiteDatabase.CursorFactory, version: Int):
@@ -21,9 +21,11 @@ class DBHelper // DBHelper 생성자로 관리할 DB 이름과 버전 정보를 
                 .rawQuery("SELECT * FROM MEMOLIST",
                           null)
             while (cursor.moveToNext()) {
-                var memo = MemoInfo(cursor.getInt(0),
-                                    cursor.getString(1),
-                                    cursor.getString(2))
+                var memo = MemoInfo(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2)
+                )
                 memoInfoArrayList.add(memo)
             }
 
