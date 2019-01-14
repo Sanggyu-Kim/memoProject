@@ -66,6 +66,7 @@ class ReadActivity : AppCompatActivity() {
                 override fun onChildAdded(p0: DataSnapshot, p1: String?) {
                     //val chat:ChatInfo= p0.getValue(ChatInfo::class.java)?:ChatInfo(0,"","")
                     Log.d("special","p0.getValue:${p0.value}")
+                    //val chat= ChatInfo(p0.value.toString())
                     //mChat.add(chat)
                     viewAdapter.notifyItemInserted(mChat.size-1)
                 }
@@ -113,6 +114,7 @@ class ReadActivity : AppCompatActivity() {
 //                chat2?.put("title",title.toString())
 //                chat2?.put("text",text)
                 var chat = ChatInfo(memoNumber?:0,title?:"",text)
+
                 myRef.setValue(chat)
                 //showToast(chat?.toString())
             }
