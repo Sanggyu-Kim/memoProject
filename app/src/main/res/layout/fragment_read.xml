@@ -7,8 +7,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
 >
-
-
     <TextView
             android:id="@+id/messageD"
             tools:text="message"
@@ -19,6 +17,4 @@
             android:ellipsize="end"
             android:textSize="20sp"
     />
-
-
 </LinearLayout>

@@ -1,49 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<android.support.design.widget.CoordinatorLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
-
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:orientation="vertical"
-              android:layout_height="match_parent"
+        tools:context=".MainActivity"
+        android:background="@color/colorPrimary"
 >
-
-    <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#dddddd"
-    />
-
-</LinearLayout>
-
-
-    <android.support.design.widget.FloatingActionButton
-            android:id="@+id/create"
+    <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@drawable/ic_create"
+            android:layout_centerInParent="true"
+            android:id="@+id/login"
+
+    >
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Memo APP"
+                android:id="@+id/tvHello"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="30dp"
+                android:textColor="#ffffff"
+                android:textSize="30sp"
+
+        />
+
+        <EditText
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:hint="ID"
+                android:id="@+id/etId"
+                android:background="#ffffff"
+                android:layout_below="@+id/tvHello"
+        />
+
+        <EditText
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="1dp"
+                android:hint="PASSWORD "
+                android:id="@+id/etPassword"
+                android:background="#ffffff"
+                android:layout_below="@+id/etId"
+        />
+
+        <Button
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Register"
+                android:id="@+id/btnRegister"
+                android:layout_below="@+id/etPassword"
+                android:layout_centerHorizontal="true"
+        />
+        <Button
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Login"
+                android:id="@+id/btnLogin"
+                android:layout_below="@+id/btnRegister"
+                android:layout_centerHorizontal="true"
+        />
+
+
+    </RelativeLayout>
+    <com.google.android.gms.common.SignInButton
+            android:id="@+id/Google_Login"
+            android:layout_width="200dp"
+            android:layout_height="50sp"
+            android:layout_below="@+id/login"
+            android:layout_centerInParent="true"
 
     />
-
-    <android.support.design.widget.FloatingActionButton
-            android:id="@+id/deleteall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@drawable/deleteall"
-
+    <android.support.v4.widget.ContentLoadingProgressBar
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:id="@+id/pbLogin"
+            android:visibility="gone"
     />
-</android.support.design.widget.CoordinatorLayout>
+
+
+</RelativeLayout>
+

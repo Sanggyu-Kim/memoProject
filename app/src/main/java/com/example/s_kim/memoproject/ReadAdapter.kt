@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-class ReadAdapter(private val testDataMemo: List<String>) :
+class ReadAdapter(private val mChat: List<ChatInfo>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
@@ -38,12 +38,13 @@ class ReadAdapter(private val testDataMemo: List<String>) :
         val myViewHolder = holder as MyViewHolder
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        myViewHolder.message.text = testDataMemo[position]
+        myViewHolder.message.text = mChat[position].chatMessage
     }
 
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = testDataMemo.size
+    override fun getItemCount() = mChat.size
+
 
 
 }
