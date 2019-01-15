@@ -1,55 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+
+
+<android.support.design.widget.CoordinatorLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        tools:context=".MainActivity">
 
-    <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/scroll2">
 
-        <LinearLayout
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_height="match_parent"
+    >
+
+        <android.support.v7.widget.RecyclerView
+                android:id="@+id/readRecycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#dddddd"
+                android:layout_above="@+id/etText"
+        />
+
+        <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-        >
-            <EditText
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:id="@+id/readTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="title"
-                    android:maxLines="1"
-                    android:layout_marginTop="28dp"
-                    tools:layout_editor_absoluteX="0dp"/>
-            <EditText
-                    app:layout_constraintTop_toBottomOf="@id/createTitle"
-                    android:id="@+id/readMessage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="message"
-                    android:minHeight="350dp"/>
-        </LinearLayout>
-    </ScrollView>
+                android:layout_alignParentBottom="true"
+                android:layout_toStartOf="@+id/btnWrite"
+                android:id="@+id/etText"
 
-    <Button
-            app:layout_constraintBottom_toBottomOf="@id/scroll2"
-            app:layout_constraintRight_toRightOf="@id/scroll2"
-            android:id="@+id/delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:text="Delete"/>
-    <Button
-            app:layout_constraintBottom_toBottomOf="@id/scroll2"
-            app:layout_constraintLeft_toLeftOf="@id/scroll2"
-            android:id="@+id/renew"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:text="Renew"/>
-</android.support.constraint.ConstraintLayout>
+        />
+
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:text="Write"
+                android:id="@+id/btnWrite"
+        />
+
+
+    </RelativeLayout>
+
+
+</android.support.design.widget.CoordinatorLayout>

@@ -1,302 +1,134 @@
 package com.example.s_kim.memoproject
 
-import android.app.Activity
+
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.*
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.util.Log
-import android.app.AlertDialog
-import android.support.v7.widget.helper.ItemTouchHelper
-import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.SignInButton
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import android.view.View
+import android.widget.*
+import com.google.android.gms.common.ConnectionResult
+import com.google.firebase.auth.GoogleAuthProvider
 
-class MainActivity: AppCompatActivity(), MyAdapter.ClickRead {
 
-    private lateinit var mRecyclerView: RecyclerView
-    private var viewAdapter: MyAdapter? = null
-    private var mToast: Toast? = null
 
-    //private var mFirebaseAnalytics: FirebaseAnalytics? = null //firebase
-    private var memoInfoArrayList = mutableListOf<MemoInfo>() //Data登録
 
-    //data
-    private val mDbOpenHelper: DbOpenHelper? = DbOpenHelper(this)
+
+
+
+class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener {
+
+    var id: EditText? = null
+    var password:EditText? = null
+    var pbLogin:ProgressBar? = null
+    var Google_Login: SignInButton? = null
+    private val RC_SIGN_IN = 1000
+    private var mAuth: FirebaseAuth? = null
+    private var mGoogleApiClient: GoogleApiClient? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        /**
-         *Obtain the FirebaseAnalytics.
-         */
-        //mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        id = findViewById(R.id.etId)
+        password = findViewById(R.id.etPassword)
+        pbLogin= findViewById(R.id.pbLogin)
 
-        /**
-         *Memo 内部データと連結
-         */
-        mDbOpenHelper?.open()
-        mDbOpenHelper?.create()
-        showDatabase()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        mGoogleApiClient = GoogleApiClient.Builder(this)
+            .enableAutoManage(this, this)
+            .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+            .build()
 
-        /**
-         *Memo作成ボタンを押すと、CreateActivityに移動
-         */
-        findViewById<FloatingActionButton>(R.id.create).setOnClickListener {
-            val changeCreate = Intent(this,
-                                      CreateActivity::class.java)
+        mAuth = FirebaseAuth.getInstance()//mAuth는 FirebaseAuth 인스턴스 변수로 선언하여 Firebase 인증을 사용할 수 있게 초기화 해줍니다.
 
-            changeCreate
-                .putExtra("memoListNumber",
-                          countData())
+        findViewById<SignInButton>(R.id.Google_Login).setOnClickListener{
+            pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
 
-            startActivityForResult(changeCreate,
-                                   1)
+            val signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+            pbLogin?.setOnSystemUiVisibilityChangeListener { View.GONE }
+
         }
 
-        /**
-         *Memo全部削除
-         */
-        findViewById<FloatingActionButton>(R.id.deleteall).setOnClickListener {
 
-            Log
-                .d("click",
-                   "delete!!")
-            deleteDialog()
+        findViewById<Button>(R.id.btnRegister).setOnClickListener{
+            pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
+
         }
 
-        /**
-         *RecyclerView適用：RecyclerViewで核心に必要なもの
-         */
-        mRecyclerView = findViewById(R.id.recycler_view)
-        mRecyclerView.layoutManager = LinearLayoutManager(this)
-        viewAdapter = MyAdapter(this,
-                                memoInfoArrayList)  //thisは class それだけでなく adapterも this
-        mRecyclerView.adapter = viewAdapter  //これがないと何も出ない。（이게 없으면 아무것도 나오지 않는다.）
 
-        val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
-        itemTouchHelper.attachToRecyclerView(mRecyclerView)
+        findViewById<Button>(R.id.btnLogin).setOnClickListener {
+            pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
+
+            val loginIntent = Intent(
+                this
+                , MemoListActivity::class.java
+            )
+            startActivity(loginIntent)
+        }
 
     }
 
-    /**
-     * RecyclerViewのlistを押すの場合、呼ぶ
-     */
-    override fun onItemSwipedAction(memoNumber: Int, title: String, message: String) {
-
-        val moveToReadIntent = Intent(this,
-                                      ReadActivity::class.java)
-        // Toast.makeText(this,"title: "+title +"message: "+message,Toast.LENGTH_LONG).show()
-        moveToReadIntent
-            .putExtra("memoNumber",
-                      memoNumber)
-        moveToReadIntent
-            .putExtra("title",
-                      title)
-        moveToReadIntent
-            .putExtra("message",
-                      message)
-        startActivityForResult(moveToReadIntent,
-                               2)
-    }
-
-    /**
-     * Intentの結果を処理
-     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super
-            .onActivityResult(requestCode,
-                              resultCode,
-                              data)
+        super.onActivityResult(requestCode, resultCode, data)
+        pbLogin?.setOnSystemUiVisibilityChangeListener { View.GONE }
 
-        /**
-        Memo作成の結果を処理
-         */
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                // memoListNumber = //Memoの別個人番号(削除と変更のため)
-                val title = data?.getStringExtra("title") ?: ""
-                val message = data?.getStringExtra("message") ?: ""
-                val memoListNumber = data?.getIntExtra("memoListNumber",
-                                                       0) ?: 0
-                val memo = MemoInfo(memoListNumber,
-                                    title,
-                                    message)
+        if (requestCode === RC_SIGN_IN) {
+            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
 
-                memoInfoArrayList.add(memo) //LISTにも ?を追加しなければならない
+            if (result.isSuccess) {
+                //구글 로그인 성공해서 파베에 인증
+                val account = result.signInAccount
+                firebaseAuthWithGoogle(account!!)
 
-                mDbOpenHelper?.open()
-                mDbOpenHelper
-                    ?.insertColumn(memoListNumber,
-                                   title,
-                                   message)
+                val loginIntent = Intent(
+                    this
+                    , MemoListActivity::class.java
+                )
+                startActivity(loginIntent)
 
-                viewAdapter?.notifyDataSetChanged()
+            } else {
+                //구글 로그인 실패
+                Toast.makeText(this,"GoogleLogin 실패!!",Toast.LENGTH_SHORT).show()
             }
         }
 
-        /**
-        Memo削除・修正の結果を処理
-         */
-        if (requestCode == 2) {
-            when (resultCode) {
-                MemoConst.RESULT_DELETE -> {
-                    val deleteTitle = data?.getStringExtra("deleteTitle") ?: ""  //null 許可しません。
-                    val deleteMessage = data?.getStringExtra("deleteMessage") ?: "" // null　許可しません。
-                    val deleteNumber = data?.getIntExtra("deleteNumber",
-                                                         0) ?: 0 //null 許可しません。
-                    val deleteIndex = memoInfoArrayList
-                        .indexOf(MemoInfo(deleteNumber,
-                                          deleteTitle,
-                                          deleteMessage))
-                    Log
-                        .d("delete",
-                           "deleteNumber:$deleteNumber deleteTitle: $deleteTitle deleteMessage: $deleteMessage deleteIndex:$deleteIndex")
-                    memoInfoArrayList
-                        .remove(MemoInfo(deleteNumber,
-                                         deleteTitle,
-                                         deleteMessage))
+    }
 
-                    mDbOpenHelper?.deleteColumn(deleteNumber)
-                    Toast
-                        .makeText(this@MainActivity,
-                                  "Dataを削除しました。",
-                                  Toast.LENGTH_SHORT).show()
 
-                    viewAdapter?.notifyDataSetChanged()
-                }
-                MemoConst.RESULT_RENEW  -> {
-                    val renewNumber = data?.getIntExtra("renewNumber",
-                                                        0) ?: 0 //null 許可しません。
-
-                    val pastTitle = data?.getStringExtra("pastTitle") ?: ""
-                    val pastMessage = data?.getStringExtra("pastMessage") ?: ""
-
-                    val renewTitle = data?.getStringExtra("renewTitle") ?: ""
-                    val renewMessage = data?.getStringExtra("renewMessage") ?: ""
-
-                    val renewIndex = memoInfoArrayList
-                        .indexOf(MemoInfo(renewNumber,
-                                          pastTitle,
-                                          pastMessage))
-                    Log
-                        .d("renew",
-                           "renewNumber:$renewNumber renewMessage: $renewMessage passMessage: $pastMessage renewIndex:$renewIndex")
-                    memoInfoArrayList[renewIndex] = MemoInfo(renewNumber,
-                                                             renewTitle,
-                                                             renewMessage)
-
-                    mDbOpenHelper
-                        ?.updateColumn(renewNumber,
-                                       renewTitle,
-                                       renewMessage)
-                    Toast
-                        .makeText(this@MainActivity,
-                                  "Dataを修正しました。.",
-                                  Toast.LENGTH_SHORT).show()
-
-                    viewAdapter?.notifyDataSetChanged()
-
+    private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
+        val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
+        mAuth?.signInWithCredential(credential)
+            ?.addOnCompleteListener(this) { task ->
+                if (!task.isSuccessful) {
+                    Toast.makeText(this@MainActivity, "인증 실패", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "구글 로그인 인증 성공", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
     }
 
-    /**
-    Memo 内部データと連結して,以前に内部データを受け取りリストに適用
-     */
-    private fun showDatabase() {
-        var iCursor = mDbOpenHelper?.sortColumn()
-        if (iCursor != null) {
-            while (iCursor.moveToNext()) {
-                var memoNumber = iCursor.getString(iCursor.getColumnIndex("memoNumber"))
-                var title = iCursor.getString(iCursor.getColumnIndex("title"))
-                var message = iCursor.getString(iCursor.getColumnIndex("message"))
+    override fun onConnectionFailed(p0: ConnectionResult) {
+      }
 
-                val memo = MemoInfo(memoNumber.toInt(),
-                                    title,
-                                    message)
-                memoInfoArrayList.add(memo)
-            }
-        }
-    }
-
-    /**
-    Memo 内部データと連結し,以前に内部データの個数をreturnする。
-     */
-    private fun countData(): Int {
-        var iCursor = mDbOpenHelper?.sortColumn()
-        var count = 0
-        if (iCursor != null) {
-            while (iCursor.moveToNext()) {
-                count = iCursor.getString(iCursor.getColumnIndex("memoNumber")).toInt()
-            }
-        }
-        return count
-    }
-
-    /**
-    Memo 全体削除ボタンをクリックするときにダイアログを表示させる。
-     */
-    private fun deleteDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("全部削除")
-        builder.setMessage("全部削除しても大丈夫ですか").setPositiveButton("YES") { dialog, id ->
-            mDbOpenHelper?.deleteAllColumns()
-            Toast
-                .makeText(this,
-                          "全部削除",
-                          Toast.LENGTH_SHORT).show()
-            memoInfoArrayList.clear()   //
-            viewAdapter?.notifyDataSetChanged()
-        }.setNegativeButton("NO") { dialog, id ->
-        }
-        builder.show()
-    }
-
-    /**
-     * memoListからswipeで削除するアクション適用
-     */
-    private var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback = object:
-            ItemTouchHelper.SimpleCallback(0,
-                                           ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-
-        override fun onMove(recyclerView: RecyclerView,
-                            viewHolder: RecyclerView.ViewHolder,
-                            target: RecyclerView.ViewHolder): Boolean {
-            showToast("on Move")
-            return true
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
-            // 削除されるitemのpositionを持ってくる
-            val position = viewHolder.adapterPosition
-            // データの該当positionを削除する。
-            memoInfoArrayList.removeAt(position)
-
-            /**
-             * 에러발생!!! 메모번호랑 클릭시 번호랑 매치해서 확인해보기... 아마도 포지션 번호랑 메모 번호가 안맞는 듯하다....
-             */
-
-            //showToast("메모번호: ${memoInfoArrayList[position].memoNumber-1}")
-            // mDbOpenHelper?.deleteColumn(memoInfoArrayList[position].memoNumber)
-            viewAdapter?.notifyItemRemoved(position)
-        }
-    }
-
-    /**
-     * Toast
-     */
-    private fun showToast(msg: String) {
-        if (mToast != null) mToast?.cancel()
-
-        mToast = Toast
-            .makeText(this@MainActivity,
-                      msg,
-                      Toast.LENGTH_SHORT)
-        mToast?.show()
+    override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+        val currentUser = this.mAuth?.currentUser
+        //updateUI(currentUser)
 
     }
+
+
 
 }
