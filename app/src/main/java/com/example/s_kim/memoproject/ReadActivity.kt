@@ -45,29 +45,30 @@ class ReadActivity : AppCompatActivity() {
         setContentView(R.layout.activity_read)
         intent() //setting intentで貰ったもの
 
-
-
-        write() // write message (style:chat)
-
-        recyclerViewMain()//RecyclerView適用：RecyclerViewで核心に必要なもの
-
-
-
+        write() // write Message (style:chat)
+        recyclerViewMain()//RecyclerView適用：RecyclerViewで核心に必要なもの  // get Message
 
 
     }
 
-
+    /**
+     * get Message (style:chat)
+     */
     private fun getData (){
         val myRef:DatabaseReference = database!!.getReference(memoNumber.toString() + title)
 
         myRef.addChildEventListener(
             object : ChildEventListener {
                 override fun onChildAdded(p0: DataSnapshot, p1: String?) {
-                    //val chat:ChatInfo= p0.getValue(ChatInfo::class.java)?:ChatInfo(0,"","")
+                    val chat:ChatInfo?= p0.getValue(ChatInfo::class.java)
+                    //Log.d("chat",chat.toString())
+
                     Log.d("special","p0.getValue:${p0.value}")
                     //val chat= ChatInfo(p0.value.toString())
-                    //mChat.add(chat)
+                    chat?.let{
+                        mChat.add(it)
+                    }
+
                     viewAdapter.notifyItemInserted(mChat.size-1)
                 }
 
@@ -88,7 +89,7 @@ class ReadActivity : AppCompatActivity() {
     }
 
     /**
-     * write message (style:chat)
+     * write Message (style:chat)
      */
     private fun write() {
         findViewById<Button>(R.id.btnWrite).setOnClickListener {
@@ -113,7 +114,7 @@ class ReadActivity : AppCompatActivity() {
 //                chat2?.put("memoNumber",memoNumber.toString())
 //                chat2?.put("title",title.toString())
 //                chat2?.put("text",text)
-                var chat = ChatInfo(memoNumber?:0,title?:"",text)
+                var chat = ChatInfo(memoNumber?.toInt()?:0,title.toString()?:"",text)
 
                 myRef.setValue(chat)
                 //showToast(chat?.toString())
