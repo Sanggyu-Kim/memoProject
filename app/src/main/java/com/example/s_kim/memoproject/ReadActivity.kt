@@ -20,9 +20,15 @@ import com.google.firebase.database.DatabaseError
 import android.R.attr.author
 import android.support.v4.app.FragmentActivity
 import android.util.Log
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import com.example.s_kim.memoproject.R.id.etText
 import com.google.firebase.database.DataSnapshot
+import android.content.Context
 import org.w3c.dom.Comment
+import android.widget.LinearLayout
+
+
 
 
 class ReadActivity : AppCompatActivity() {
@@ -31,7 +37,7 @@ class ReadActivity : AppCompatActivity() {
     private var memoNumber: Int? = 0
     private var mToast: Toast? = null
     private var etText: EditText? = null
-
+    private var imm: InputMethodManager?= null
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -45,8 +51,12 @@ class ReadActivity : AppCompatActivity() {
         setContentView(R.layout.activity_read)
         intent() //setting intentで貰ったもの
 
+        imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        showAndHideKeyboard()//keyBoard 見える・隠す
         write() // write Message (style:chat)
         recyclerViewMain()//RecyclerView適用：RecyclerViewで核心に必要なもの  // get Message
+
+
 
 
     }
@@ -55,16 +65,14 @@ class ReadActivity : AppCompatActivity() {
      * get Message (style:chat)
      */
     private fun getData (){
-        val myRef:DatabaseReference = database!!.getReference(memoNumber.toString() + title)
+        val myRef:DatabaseReference = database.getReference(memoNumber.toString() + title)
 
         myRef.addChildEventListener(
             object : ChildEventListener {
                 override fun onChildAdded(p0: DataSnapshot, p1: String?) {
                     val chat:ChatInfo?= p0.getValue(ChatInfo::class.java)
-                    //Log.d("chat",chat.toString())
 
                     Log.d("special","p0.getValue:${p0.value}")
-                    //val chat= ChatInfo(p0.value.toString())
                     chat?.let{
                         mChat.add(it)
                     }
@@ -108,7 +116,7 @@ class ReadActivity : AppCompatActivity() {
                 val formattedDate = df.format(c)
 
 
-                val myRef = database!!.getReference(memoNumber.toString() + title).child(formattedDate)
+                val myRef = database.getReference(memoNumber.toString() + title).child(formattedDate)
 
 //                var chat2: java.util.HashMap<String,String>?=null
 //                chat2?.put("memoNumber",memoNumber.toString())
@@ -156,7 +164,57 @@ class ReadActivity : AppCompatActivity() {
             // specify an viewAdapter (see also next example)
             adapter = viewAdapter
         }
+
+
+
+
     }
+
+
+
+    /**
+    //     *keyBoard 見える・隠す
+    //     */
+    private fun showAndHideKeyboard() {
+        imm!!
+            .hideSoftInputFromWindow(
+                etText?.windowToken,
+                0
+            )
+        var titleSwitch = true
+        findViewById<EditText>(R.id.etText).setOnClickListener {
+            titleSwitch = if (titleSwitch) {
+                it.hideKeyboard()
+                false
+            } else {
+                it.showKeyboard(it)
+                R.id.readRecycler_view
+                true
+
+
+            }
+        }
+
+
+
+    }
+
+    private fun View.hideKeyboard() {
+       imm!!
+            .hideSoftInputFromWindow(
+                windowToken,
+                0
+            )
+    }
+
+    private fun View.showKeyboard(view: View) {
+        imm!!
+            .showSoftInput(
+                view,
+                0
+            )
+    }
+
 
     /**
      * Toast

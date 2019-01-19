@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.support.v7.widget.GridLayoutManager
+
+
 
 class ReadAdapter(private val mChat: List<ChatInfo>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -39,6 +42,8 @@ class ReadAdapter(private val mChat: List<ChatInfo>) :
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         myViewHolder.message.text = mChat[position].chatMessage
+
+
     }
 
 

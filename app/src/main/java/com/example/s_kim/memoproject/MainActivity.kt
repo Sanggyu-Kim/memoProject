@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
         password = findViewById(R.id.etPassword)
         pbLogin= findViewById(R.id.pbLogin)
 
+        //google Login
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
@@ -49,24 +50,21 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
             .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
             .build()
 
-        mAuth = FirebaseAuth.getInstance()//mAuth는 FirebaseAuth 인스턴스 변수로 선언하여 Firebase 인증을 사용할 수 있게 초기화 해줍니다.
+        //firebase:mAuthは FirebaseAuth インスタンス変数に宣言して Firebase 認証を使用できるように初期化します_mAuth는 FirebaseAuth 인스턴스 변수로 선언하여 Firebase 인증을 사용할 수 있게 초기화 해줍니다.
+        mAuth = FirebaseAuth.getInstance()
 
-        findViewById<SignInButton>(R.id.Google_Login).setOnClickListener{
-            pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
+        Login()
+        googleLogin()
 
-            val signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
-            startActivityForResult(signInIntent, RC_SIGN_IN)
-            pbLogin?.setOnSystemUiVisibilityChangeListener { View.GONE }
-
-        }
+    }
 
 
-        findViewById<Button>(R.id.btnRegister).setOnClickListener{
-            pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
-
-        }
 
 
+    /**
+     * Login
+     */
+    private fun Login(){
         findViewById<Button>(R.id.btnLogin).setOnClickListener {
             pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
 
@@ -76,7 +74,20 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
             )
             startActivity(loginIntent)
         }
+    }
 
+    /**
+     * google Login
+     */
+    private fun googleLogin (){
+        findViewById<SignInButton>(R.id.Google_Login).setOnClickListener{
+            pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
+
+            val signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+            pbLogin?.setOnSystemUiVisibilityChangeListener { View.GONE }
+
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -87,7 +98,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
             val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
 
             if (result.isSuccess) {
-                //구글 로그인 성공해서 파베에 인증
+                //googleのloginに成功してfirebaseに認証
                 val account = result.signInAccount
                 firebaseAuthWithGoogle(account!!)
 
@@ -98,22 +109,21 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
                 startActivity(loginIntent)
 
             } else {
-                //구글 로그인 실패
-                Toast.makeText(this,"GoogleLogin 실패!!",Toast.LENGTH_SHORT).show()
+                //google login 失敗
+                Toast.makeText(this,"GoogleLogin 失敗!!",Toast.LENGTH_SHORT).show()
             }
         }
 
     }
-
 
     private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
         val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
         mAuth?.signInWithCredential(credential)
             ?.addOnCompleteListener(this) { task ->
                 if (!task.isSuccessful) {
-                    Toast.makeText(this@MainActivity, "인증 실패", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "認証 失敗", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@MainActivity, "구글 로그인 인증 성공", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "googleのloginの認証成功", Toast.LENGTH_SHORT).show()
                 }
             }
     }

@@ -23,7 +23,9 @@
         </activity>
         <activity android:name=".MemoListActivity"/>
         <activity android:name=".CreateActivity"/>
-        <activity android:name=".ReadActivity"/>
+        <activity android:name=".ReadActivity"
+                  android:windowSoftInputMode="adjustResize"
+        />
 
         <meta-data
                 android:name="com.google.android.actions"
