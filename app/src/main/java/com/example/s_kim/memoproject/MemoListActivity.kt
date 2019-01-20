@@ -18,12 +18,13 @@ class MemoListActivity : AppCompatActivity(), MainAdapter.ClickRead {
     private var mToast: Toast? = null
     private var memoInfoArrayList = mutableListOf<MemoInfo>() //listでData登録
     private val mDbOpenHelper: DbOpenHelper? = DbOpenHelper(this) //data
+    private var id: String? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memolist)
-
+        id = intent.getStringExtra("loginId")
         sqlLiteData()//Memo 内部データと連結
         create() //Memo作成ボタンを押すと、CreateActivityに移動
         deleteAll()//Memo全部削除

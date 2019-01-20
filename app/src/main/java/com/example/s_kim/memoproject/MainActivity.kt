@@ -13,6 +13,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import android.view.View
 import android.widget.*
 import com.google.android.gms.common.ConnectionResult
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 
 
@@ -30,12 +31,12 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
     private val RC_SIGN_IN = 1000
     private var mAuth: FirebaseAuth? = null
     private var mGoogleApiClient: GoogleApiClient? = null
-
+    var loginId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        mAuth = FirebaseAuth.getInstance()
         id = findViewById(R.id.etId)
         password = findViewById(R.id.etPassword)
         pbLogin= findViewById(R.id.pbLogin)
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
             .build()
 
         //firebase:mAuthは FirebaseAuth インスタンス変数に宣言して Firebase 認証を使用できるように初期化します_mAuth는 FirebaseAuth 인스턴스 변수로 선언하여 Firebase 인증을 사용할 수 있게 초기화 해줍니다.
-        mAuth = FirebaseAuth.getInstance()
+
 
         Login()
         googleLogin()
@@ -59,12 +60,10 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
     }
 
 
-
-
     /**
      * Login
      */
-    private fun Login(){
+    private fun Login() {
         findViewById<Button>(R.id.btnLogin).setOnClickListener {
             pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
 
@@ -72,6 +71,8 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
                 this
                 , MemoListActivity::class.java
             )
+
+            loginIntent.putExtra("loginId",id?.text.toString())
             startActivity(loginIntent)
         }
     }
@@ -79,14 +80,27 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
     /**
      * google Login
      */
-    private fun googleLogin (){
-        findViewById<SignInButton>(R.id.Google_Login).setOnClickListener{
+    private fun googleLogin() {
+        findViewById<SignInButton>(R.id.Google_Login).setOnClickListener {
             pbLogin?.setOnSystemUiVisibilityChangeListener { View.VISIBLE }
+
+
+            val mUser: FirebaseUser? = mAuth?.currentUser
+            mUser?.getIdToken(true)
+                ?.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val idToken = task.result!!.token
+                        loginId = idToken
+
+                    } else {
+                        // Handle error -> task.getException();
+                    }
+                }
 
             val signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient)
             startActivityForResult(signInIntent, RC_SIGN_IN)
-            pbLogin?.setOnSystemUiVisibilityChangeListener { View.GONE }
 
+            pbLogin?.setOnSystemUiVisibilityChangeListener { View.GONE }
         }
     }
 
@@ -106,11 +120,13 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
                     this
                     , MemoListActivity::class.java
                 )
+
+                loginIntent.putExtra("loginId", loginId)
                 startActivity(loginIntent)
 
             } else {
                 //google login 失敗
-                Toast.makeText(this,"GoogleLogin 失敗!!",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "GoogleLogin 失敗!!", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -129,7 +145,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
     }
 
     override fun onConnectionFailed(p0: ConnectionResult) {
-      }
+    }
 
     override fun onStart() {
         super.onStart()
@@ -138,7 +154,6 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedList
         //updateUI(currentUser)
 
     }
-
 
 
 }

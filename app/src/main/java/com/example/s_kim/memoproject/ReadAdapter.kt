@@ -5,9 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.support.v7.widget.GridLayoutManager
-
-
 
 class ReadAdapter(private val mChat: List<ChatInfo>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -17,7 +14,11 @@ class ReadAdapter(private val mChat: List<ChatInfo>) :
         var message: TextView = view.findViewById(R.id.messageD)        //view를 통째로 받아서 뷰에서 텍스트뷰를 찾아야하지만 텍스트뷰안에서 자신(텍스트뷰)을 찾으려고 하면 못 찾는다.
     }
 
+    override fun getItemViewType(position: Int): Int {
 
+
+        return super.getItemViewType(position)
+    }
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -42,8 +43,6 @@ class ReadAdapter(private val mChat: List<ChatInfo>) :
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         myViewHolder.message.text = mChat[position].chatMessage
-
-
     }
 
 
