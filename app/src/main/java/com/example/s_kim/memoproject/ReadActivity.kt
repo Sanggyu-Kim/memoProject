@@ -1,34 +1,25 @@
 package com.example.s_kim.memoproject
 
 
+import android.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import java.util.*
-import kotlin.collections.HashMap
 
 import java.text.SimpleDateFormat
 import com.google.firebase.database.DatabaseError
-import android.R.attr.author
-import android.support.v4.app.FragmentActivity
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import com.example.s_kim.memoproject.R.id.etText
 import com.google.firebase.database.DataSnapshot
 import android.content.Context
-import org.w3c.dom.Comment
-import android.widget.LinearLayout
-
-
+import android.widget.*
+import android.content.DialogInterface
 
 
 class ReadActivity : AppCompatActivity() {
@@ -37,7 +28,11 @@ class ReadActivity : AppCompatActivity() {
     private var memoNumber: Int? = 0
     private var mToast: Toast? = null
     private var etText: EditText? = null
-    private var imm: InputMethodManager?= null
+    private var imm: InputMethodManager? = null
+    private var color: String? = "black"
+    private var chatMessage: TextView? = null
+    private var switch: Boolean = true
+    private var blank: RelativeLayout? = null
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -53,31 +48,55 @@ class ReadActivity : AppCompatActivity() {
 
         imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         showAndHideKeyboard()//keyBoard 見える・隠す
+        rodioButton()
         write() // write Message (style:chat)
-        recyclerViewMain()//RecyclerView適用：RecyclerViewで核心に必要なもの  // get Message
+        recyclerView.scrollToPosition(mChat.size - 1) //View a recentMessage
+
+    }
 
 
+    private fun rodioButton() {
+        if (switch) {
+            recyclerViewMain()//RecyclerView適用：RecyclerViewで核心に必要なもの  // get Message
+        }
+        findViewById<RadioButton>(R.id.black).setOnClickListener {
+            color = "black"
+            recyclerViewMain()
+            switch = false
+        }
+        findViewById<RadioButton>(R.id.blue).setOnClickListener {
+            color = "blue"
+            recyclerViewMain()
+            switch = false
+        }
+
+        findViewById<RadioButton>(R.id.red).setOnClickListener {
+            color = "red"
+            recyclerViewMain()
+            switch = false
+        }
 
 
     }
 
+
     /**
      * get Message (style:chat)
      */
-    private fun getData (){
-        val myRef:DatabaseReference = database.getReference(memoNumber.toString() + title)
+    private fun getData() {
+        val myRef: DatabaseReference = database.getReference(memoNumber.toString() + title)
 
         myRef.addChildEventListener(
             object : ChildEventListener {
                 override fun onChildAdded(p0: DataSnapshot, p1: String?) {
-                    val chat:ChatInfo?= p0.getValue(ChatInfo::class.java)
+                    val chat: ChatInfo? = p0.getValue(ChatInfo::class.java)
 
-                    Log.d("special","p0.getValue:${p0.value}")
-                    chat?.let{
+                    Log.d("special", "p0.getValue:${p0.value}")
+                    chat?.let {
                         mChat.add(it)
+                        recyclerView.scrollToPosition(mChat.size - 1)
                     }
-
-                    viewAdapter.notifyItemInserted(mChat.size-1)
+                    viewAdapter.notifyItemInserted(mChat.size - 1)
                 }
 
                 override fun onChildChanged(p0: DataSnapshot, p1: String?) {
@@ -122,10 +141,11 @@ class ReadActivity : AppCompatActivity() {
 //                chat2?.put("memoNumber",memoNumber.toString())
 //                chat2?.put("title",title.toString())
 //                chat2?.put("text",text)
-                var chat = ChatInfo(memoNumber?.toInt()?:0,title.toString()?:"",text)
+                var chat = ChatInfo(color, memoNumber?.toInt() ?: 0, title.toString() ?: "", text)
 
                 myRef.setValue(chat)
                 //showToast(chat?.toString())
+                etText?.text?.clear()
             }
 
         }
@@ -150,10 +170,10 @@ class ReadActivity : AppCompatActivity() {
      *RecyclerView適用：RecyclerViewで核心に必要なもの
      */
     private fun recyclerViewMain() {
-
+        mChat.clear()
         getData()
         viewManager = LinearLayoutManager(this)
-        viewAdapter = ReadAdapter(mChat)
+        viewAdapter = ReadAdapter(mChat, color ?: "yellow")
 
         recyclerView = findViewById<RecyclerView>(R.id.readRecycler_view).apply {
             // use this setting to improve performance if you know that changes
@@ -166,10 +186,7 @@ class ReadActivity : AppCompatActivity() {
         }
 
 
-
-
     }
-
 
 
     /**
@@ -181,26 +198,27 @@ class ReadActivity : AppCompatActivity() {
                 etText?.windowToken,
                 0
             )
-        var titleSwitch = true
+        var etTextSwitch = true
         findViewById<EditText>(R.id.etText).setOnClickListener {
-            titleSwitch = if (titleSwitch) {
+            etTextSwitch = if (etTextSwitch) {
                 it.hideKeyboard()
+                recyclerView.scrollToPosition(mChat.size - 1)
                 false
             } else {
                 it.showKeyboard(it)
-                R.id.readRecycler_view
+
+                // keyboard 어떻게 하지?? 키보드가 켜지면 리사이클러뷰가 자동으로 수정
+
+                recyclerView.scrollToPosition(mChat.size - 1)
                 true
-
-
             }
         }
-
 
 
     }
 
     private fun View.hideKeyboard() {
-       imm!!
+        imm!!
             .hideSoftInputFromWindow(
                 windowToken,
                 0
@@ -233,5 +251,22 @@ class ReadActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * 단말기 기기 백키
+     *
+     *  activity가 3개 있으니깐
+     *  moveTaskToBack(true) finish() android.os.Process.killProcess(android.os.Process.myPid())
+     *  해야 종료된다.
+     */
+    override fun onBackPressed() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("APPを終了しますか")
+        builder.setMessage("Are you sure you want to exit?").setPositiveButton("YES") { dialog, id ->
+            moveTaskToBack(true)
+            finish()
+            android.os.Process.killProcess(android.os.Process.myPid())
+        }.setNegativeButton("NO") { dialog, id -> }
+        builder.show()
+    }
 }
 
